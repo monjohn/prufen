@@ -69,9 +69,19 @@ fn sorted_by_root(wordpairs: Vec<WordPair>) -> HashMap<String, Vec<WordPair>> {
         })
 }
 
-fn pick_one(words: &Vec<WordPair>) -> WordPair {
-    let random_pick: usize = thread_rng().gen_range(0, words.len());
-    words[random_pick].clone()
+fn pick_one<T>(coll: &Vec<T>) -> T
+    where T: std::clone::Clone
+{
+    let random_pick: usize = thread_rng().gen_range(0, coll.len());
+    coll[random_pick].clone()
+}
+
+fn select_nouns_or_verbs(words: &Vec<WordPair>) -> Vec<WordPair> {
+    let random_pick = thread_rng().gen_weighted_bool(6);
+    match random_pick {
+        true => only_verbs(words),
+        false => only_nouns(words),
+    }
 }
 
 fn select_four(words: &Vec<WordPair>) -> Vec<WordPair> {
@@ -129,12 +139,15 @@ fn main() {
     let sorted_by_root = sorted_by_root(words);
 
     loop {
-        let current_root = sorted_by_root.keys().peekable().last().unwrap();
+        let root_keys = sorted_by_root.keys();
+
+        let keys = root_keys.map(|noun| noun.clone()).collect::<Vec<String>>();
+        let current_root = pick_one(&keys);
         let selected_wordpairs = sorted_by_root.get(&current_root.to_string())
             .expect("Where did the words go?");
 
-        let verbs = only_verbs(&selected_wordpairs);
-        let options = select_four(&verbs);
+        let nouns_or_verbs = select_nouns_or_verbs(&selected_wordpairs);
+        let options = select_four(&nouns_or_verbs);
         let word_pair = pick_one(&options);
 
 
