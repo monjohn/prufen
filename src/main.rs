@@ -148,6 +148,9 @@ fn main() {
 
         let nouns_or_verbs = select_nouns_or_verbs(&selected_wordpairs);
         let options = select_four(&nouns_or_verbs);
+        if options.len() == 0 {
+            continue;
+        }
         let word_pair = pick_one(&options);
 
 
